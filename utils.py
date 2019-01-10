@@ -1,6 +1,7 @@
 import json
+import torch
 
-def save_checkpoint(model, optimizer, args, classifier):
+def save_checkpoint(model, optimizer, args, classifier, save_location):
     
     checkpoint = {
         'arch': args.arch, 
@@ -14,7 +15,7 @@ def save_checkpoint(model, optimizer, args, classifier):
         'class_to_idx': model.class_to_idx
     }
 
-    torch.save(checkpoint, 'checkpoint.pth')
+    torch.save(checkpoint, save_location)
 
     
 def load_checkpoint(filepath):

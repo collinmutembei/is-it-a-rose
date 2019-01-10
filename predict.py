@@ -2,6 +2,7 @@ import os
 import random
 import argparse
 import torch
+import numpy as np
 from PIL import Image
 
 from utils import load_checkpoint, load_category_to_names_mapping
@@ -25,7 +26,7 @@ def process_image(image):
 def predict(image_path, model, topk, use_gpu):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
-    device = torch.device("cuda:0" if (use_gpu and cuda.is_available()) else "cpu")
+    device = torch.device("cuda:0" if (use_gpu and torch.cuda.is_available()) else "cpu")
     model.to(device)
     model.eval()
     processed_image = process_image(image_path)
@@ -54,6 +55,8 @@ if __name__ == "__main__":
     
     model = load_checkpoint(arguments.checkpoint_file)
     category_to_names = load_category_to_names_mapping(arguments.category_names)
-    probabilities, classes = predict(image_path=argument.image_file, model=model, topk=argument.top_k, use_gpu=arguments.gpu)
-    print("probabilities={}, classes={}".format(probabilities, classes))
-    print("Flower is {} likely to be {}.".format(max(probabilities), classes[probabilities.index(max(probabilities))]))
+    probabilities, classes = predict(image_path=arguments.image_file, model=model, topk=arguments.top_k, use_gpu=arguments.gpu)
+    probable_label = classes[probabilities.index(max(probabilities))]
+    probable_label_index = list(category_to_names.keys())[int(probable_label)]
+    print("probabilities={} classes={}\n".format(probabilities, classes))
+    print("Flower in location {} is {:.0%} likely to be '{}'.".format(arguments.image_file, max(probabilities), category_to_names.get(probable_label_index).title()))

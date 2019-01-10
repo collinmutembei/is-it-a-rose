@@ -8,7 +8,7 @@ from torchvision import datasets
 from torchvision import models
 from utils import save_checkpoint
 
-def train(model, criterion, optimizer, dataloaders, epochs, gpu):
+def train(model, criterion, optimizer, dataloaders, epochs, use_gpu):
     steps = 0
     running_loss = 0
     accuracy = 0
@@ -55,10 +55,8 @@ if __name__ == "__main__":
     parser.add_argument("--hidden_units", dest="hidden_units", default=1024)
     parser.add_argument("--epochs", dest="epochs", default=4)
     parser.add_argument("--gpu", action="store_true")
-    
     arguments = parser.parse_args()
     
-    import ipdb; ipdb.set_trace()
     data_dir = arguments.data_directory
     train_dir = data_dir + "/train"
     valid_dir = data_dir + "/valid"
@@ -120,4 +118,4 @@ if __name__ == "__main__":
     use_gpu = arguments.gpu
     train(model, criterion, optimizer, dataloaders, epochs, use_gpu)
     model.class_to_idx = image_datasets.get("train").class_to_idx
-    save_checkpoint(model, optimizer, arguments, classifier)
+    save_checkpoint(model, optimizer, arguments, classifier, arguments.save_directory)
