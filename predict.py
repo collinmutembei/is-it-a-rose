@@ -12,11 +12,14 @@ def process_image(image):
         returns an Numpy array
     '''    
     im = Image.open(image)
-    im = im.resize((256, 256))
+    width, height = im.size
+    shortest_side = min(width, height)
+    new_size = [int((width / shortest_side) * 256), int((height / shortest_side) * 256)]
+    im.thumbnail(new_size, Image.ANTIALIAS)
     left_upper_dimension = (256 - 224) / 2
     right_lower_dimension = (224 + 256) / 2
     im = im.crop((left_upper_dimension, left_upper_dimension, right_lower_dimension, right_lower_dimension))
-    
+    im = np.array(im) / 255.
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
     im = (im - mean) / std
@@ -36,7 +39,9 @@ def predict(image_path, model, topk, use_gpu):
     probabilities = torch.exp(output).data
     top_probabilities = torch.topk(probabilities, topk)[0].tolist()[0]
     top_probable_indices = torch.topk(probabilities, topk)[1].tolist()[0]
-    top_probable_classes = [list(model.class_to_idx.keys())[top_probable_indices[i]] for i in range(topk)]
+
+    index_to_class = {val: key for key, val in model.class_to_idx.items()}
+    top_probable_classes = [index_to_class.get(probable_class) for probable_class in top_probable_indices]
     
     return top_probabilities, top_probable_classes
 
